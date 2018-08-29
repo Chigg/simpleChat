@@ -32,20 +32,24 @@ io.on('connection', (socket) => {
 	socket.on('new_user', (data) => {
 		userList.push(socket.username);
 		user_dict[socket.username] = userList.length-1;
-		
+		socket.ID = user_dict[socket.username]
+		io.sockets.emit('refresh_list');
 		io.sockets.emit('new_user', {userList : userList});
 		io.sockets.emit('new_message', {message : socket.username + " has joined.", username : "Host"});
+		
 	})
 	
     //listen on change_username
     socket.on('change_username', (data) => {
 		//remove whitespace and check if empty. no empty usernames fellas!
 		if (data.username.replace(/\s/g, '').length != 0){
+			io.sockets.emit('refresh_list');
 			var old_name = socket.username
 			socket.username = data.username
 			
 			//lookup ID and replace old name with new name
 			//where ID is position in userList, replace in userList
+			console.log(socket.ID);
 			var name_index = user_dict[old_name];
 			userList[name_index] = socket.username;
 			user_dict[socket.username] = name_index;
@@ -55,15 +59,14 @@ io.on('connection', (socket) => {
 		
 			//update userList by removing old_name from userList
 			//emit new event with updated userList
-			io.sockets.emit('new_user', {userList: userList});
 			
+			io.sockets.emit('new_user', {userList: userList});
 			io.sockets.emit('new_message', {message : old_name + " has changed their name to " + socket.username, username : "Host", limit : data.limit});
 		}
     })
 
     //listen on new_message
     socket.on('new_message', (data) => {
-		
 		socket.limit += 1
         //broadcast the new message
 		if (socket.limit < socket.limit_max && data.message.length < 280){
@@ -88,8 +91,6 @@ io.on('connection', (socket) => {
 		socket.limit = 0;
 	}
 })
-	
-
 
 function createUsername(firstQualif, secondQualif){
 	var animal = {

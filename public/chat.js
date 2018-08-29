@@ -38,6 +38,10 @@ $(function(){
 			chatters.append("<p class='usernames'>" + data.userList[i] + "</p>")
 		}
 	})
+	
+	socket.on("refresh_list", (data) => {
+		document.getElementById("chatters").innerHTML = '';
+	})
 
 	//Emit a username
 	send_username.click(function(){
