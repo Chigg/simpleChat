@@ -8,5 +8,6 @@ template from https://medium.com/@noufel.gouirhate/build-a-simple-chat-app-with-
 # added:
 
 - random username generator
-- clientside "spam protection" that blocks serverside broadcasts
+- serverside spam protection from long msgs & msg frequency
+- proper scrolldown & linebreak
 

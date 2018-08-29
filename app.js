@@ -14,7 +14,6 @@ server = app.listen(3000)
 
 const io = require("socket.io")(server)
 
-
 io.on('connection', (socket) => {
 	
 	console.log('New user connected')
@@ -25,6 +24,7 @@ io.on('connection', (socket) => {
 	socket.username = createUsername(firstQualif, secondQualif);
 	socket.limit = 0
 	socket.limit_max = 3
+	socket.limit_timer_on = false;
     //listen on change_username
     socket.on('change_username', (data) => {
         socket.username = data.username
@@ -39,18 +39,24 @@ io.on('connection', (socket) => {
 		//possibly stop client-side 'new_message' broadcasts?
 		
 		socket.limit += 1
-		console.log(data.message.length)
+		console.log(socket.limit)
+		console.log(socket.limit_timer_on)
+
         //broadcast the new message
 		if (socket.limit < socket.limit_max && data.message.length < 280){
 			io.sockets.emit('new_message', {message : data.message, username : socket.username, limit : data.limit});
-		}
-		else{
-			socket.emit('new_message', {message : 'Please do not spam. (Only you can see this message)', username : socket.username});
+			socket.limit_timer_on = false;
 			
 		}
-		//limit should constantly be refreshing
-		//how much resources is this constantly using?
-		setTimeout(resetLimit, 3000);
+		else{
+			//implemented a switch so that the cooldown can't be hit multiple times
+			if (socket.limit_timer_on == false){
+				console.log("hit this")
+				socket.limit_timer_on = true;
+				setTimeout(resetLimit, 3000);
+			}
+			socket.emit('new_message', {message : 'Please do not spam. (Only you can see this message)', username : socket.username});
+		}
     })
 
     //listen on typing

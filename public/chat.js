@@ -19,6 +19,10 @@ $(function(){
 
 	//Listen on new_message
 	socket.on("new_message", (data) => {
+		
+		var objDiv = document.getElementById("chatroom");
+			objDiv.scrollTop = objDiv.scrollHeight;
+			
 		feedback.html('');
 		message.val('');
 		chatroom.append("<p class='message'>" + data.username + ": " + data.message + "</p>")
