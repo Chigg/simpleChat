@@ -25,40 +25,32 @@ io.on('connection', (socket) => {
 	socket.limit = 0
 	socket.limit_max = 3
 	socket.limit_timer_on = false;
+	
     //listen on change_username
     socket.on('change_username', (data) => {
-        socket.username = data.username
+		//remove whitespace and check if empty. no empty usernames fellas!
+		if (data.username.replace(/\s/g, '').length != 0){
+			socket.username = data.username
+		}
     })
-
     //listen on new_message
     socket.on('new_message', (data) => {
 		
-		//for every new_message broadcast, iterate by 1
-		//data is still being transferred but cant block connection bc other messages
-		//need to be recieved
-		//possibly stop client-side 'new_message' broadcasts?
-		
 		socket.limit += 1
-		console.log(socket.limit)
-		console.log(socket.limit_timer_on)
-
         //broadcast the new message
 		if (socket.limit < socket.limit_max && data.message.length < 280){
 			io.sockets.emit('new_message', {message : data.message, username : socket.username, limit : data.limit});
-			socket.limit_timer_on = false;
-			
+			socket.limit_timer_on = false;			
 		}
 		else{
 			//implemented a switch so that the cooldown can't be hit multiple times
 			if (socket.limit_timer_on == false){
-				console.log("hit this")
 				socket.limit_timer_on = true;
 				setTimeout(resetLimit, 3000);
 			}
 			socket.emit('new_message', {message : 'Please do not spam. (Only you can see this message)', username : socket.username});
 		}
     })
-
     //listen on typing
     socket.on('typing', (data) => {
     	socket.broadcast.emit('typing', {username : socket.username})
@@ -69,8 +61,6 @@ io.on('connection', (socket) => {
 	}
 })
 	
-
-
 function createUsername(firstQualif, secondQualif){
 	var animal = {
 		1: "Chimp",
