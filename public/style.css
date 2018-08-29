@@ -48,6 +48,9 @@ section#chatroom {
 	
 	
 }
+section#chatters{
+	height: 5%;
+}
 
 section#lobby {
     border: 5px solid #32363d;
@@ -57,10 +60,10 @@ section#lobby {
 	
 	
 }
-h2{
+h3{
 	text-align: center;
 	font-family: 'Comfortaa', sans-serif;
-    margin: 0px;
+    margin: 10px;
 }
 
 section#input_zone {
@@ -89,13 +92,19 @@ input#message {
     width: 88%;
     height: 70%;
     font-family: 'Comfortaa', sans-serif;
-    font-size: 2vh;
+    font-size: 3vh;
 }
 
 button#send_message {
     display: inline-block;
     height: 70%;
     width: 10%;
+}
+p.usernames{
+	font-size: 1vh;
+	margin-left: 2vh;
+	position: center;
+	font-family: 'Comfortaa', sans-serif;
 }
 
 p.message {

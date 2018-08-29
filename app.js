@@ -13,6 +13,7 @@ app.get('/', (req, res) => {
 server = app.listen(3000)
 
 const io = require("socket.io")(server)
+var userList = [];
 
 io.on('connection', (socket) => {
 	
@@ -26,13 +27,31 @@ io.on('connection', (socket) => {
 	socket.limit_max = 3
 	socket.limit_timer_on = false;
 	
+		
+	socket.on('new_user', (data) => {
+		userList.push(socket.username);
+		console.log(userList)
+		io.sockets.emit('new_user', {userList : userList});
+		io.sockets.emit('new_message', {message : socket.username + " has joined.", username : "Host"});
+	})
+	
     //listen on change_username
     socket.on('change_username', (data) => {
 		//remove whitespace and check if empty. no empty usernames fellas!
 		if (data.username.replace(/\s/g, '').length != 0){
+			var old_name = socket.username
 			socket.username = data.username
+			
+			//update userList by removing old_name from userList
+			//emit new event with updated userList
+			//create dictionary with key of ID and value pair of name
+			//lookup ID and replace old name with new name
+			//where ID is position in userList, replace in userList
+			
+			io.sockets.emit('new_message', {message : old_name + " has changed their name to " + socket.username, username : "Host", limit : data.limit});
 		}
     })
+
     //listen on new_message
     socket.on('new_message', (data) => {
 		
@@ -48,7 +67,7 @@ io.on('connection', (socket) => {
 				socket.limit_timer_on = true;
 				setTimeout(resetLimit, 3000);
 			}
-			socket.emit('new_message', {message : 'Please do not spam. (Only you can see this message)', username : socket.username});
+			socket.emit('new_message', {message : 'Please do not spam. (Only you can see this message)', username : "Host"});
 		}
     })
     //listen on typing
@@ -61,6 +80,8 @@ io.on('connection', (socket) => {
 	}
 })
 	
+
+
 function createUsername(firstQualif, secondQualif){
 	var animal = {
 		1: "Chimp",
