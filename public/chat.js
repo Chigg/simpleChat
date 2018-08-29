@@ -10,14 +10,11 @@ $(function(){
 	var send_username = $("#send_username")
 	var chatroom = $("#chatroom")
 	var feedback = $("#feedback")
-	var limit = 0
 	
 	//Emit message
 	send_message.click(function(){
-		limit += 1
-		socket.emit('new_message', {message : message.val(), limit : limit})
-		
-		setTimeout(resetLimit, 3000);
+		//limit += 1
+		socket.emit('new_message', {message : message.val()})
 	})
 
 	//Listen on new_message
@@ -41,10 +38,6 @@ $(function(){
 	socket.on('typing', (data) => {
 		feedback.html("<p><i>" + data.username + " is typing a message..." + "</i></p>")
 	})
-	
-	function resetLimit (){
-		limit = 0;
-	}
 });
 
 

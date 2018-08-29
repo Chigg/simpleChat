@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 server = app.listen(3000)
 
 const io = require("socket.io")(server)
-var ratelimit = 0
+
 
 io.on('connection', (socket) => {
 	
@@ -23,7 +23,8 @@ io.on('connection', (socket) => {
 	var firstQualif = Math.floor(Math.random() * (20 - 1 + 1)) + 1;
 	var secondQualif = Math.floor(Math.random() * (20 - 1 + 1)) + 1;
 	socket.username = createUsername(firstQualif, secondQualif);
-
+	socket.limit = 0
+	socket.limit_max = 3
     //listen on change_username
     socket.on('change_username', (data) => {
         socket.username = data.username
@@ -31,21 +32,38 @@ io.on('connection', (socket) => {
 
     //listen on new_message
     socket.on('new_message', (data) => {
+		
+		//for every new_message broadcast, iterate by 1
+		//data is still being transferred but cant block connection bc other messages
+		//need to be recieved
+		//possibly stop client-side 'new_message' broadcasts?
+		
+		socket.limit += 1
+		console.log(data.message.length)
         //broadcast the new message
-		if (data.limit < 3) {
-			io.sockets.emit('new_message', {message : data.message, username : socket.username});
-			
+		if (socket.limit < socket.limit_max && data.message.length < 280){
+			io.sockets.emit('new_message', {message : data.message, username : socket.username, limit : data.limit});
 		}
 		else{
-			socket.emit('new_message', {message : 'Please do not spam. (You are the only one that can see this message)', username : socket.username});
+			socket.emit('new_message', {message : 'Please do not spam. (Only you can see this message)', username : socket.username});
+			
 		}
+		//limit should constantly be refreshing
+		//how much resources is this constantly using?
+		setTimeout(resetLimit, 3000);
     })
 
     //listen on typing
     socket.on('typing', (data) => {
     	socket.broadcast.emit('typing', {username : socket.username})
     })
+	
+	function resetLimit (){
+		socket.limit = 0;
+	}
 })
+	
+
 
 function createUsername(firstQualif, secondQualif){
 	var animal = {
