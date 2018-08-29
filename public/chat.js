@@ -33,15 +33,9 @@ $(function(){
 	})
 	
 	socket.on("new_user", (data) => {
-		
+		//need to figure out how to overwrite these everytime a new userList is supplied.
 		for (var i = 0; i < data.userList.length; i++){
 			chatters.append("<p class='usernames'>" + data.userList[i] + "</p>")
-		}
-	})
-	
-	socket.on("user_left", (data) => {	
-		for (var i = 0; i < data.userList.length; i++){
-			chatters.append("<p class ='usernames'>" + data.userList[i] + "</p>")
 		}
 	})
 

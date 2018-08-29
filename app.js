@@ -14,6 +14,7 @@ server = app.listen(3000)
 
 const io = require("socket.io")(server)
 var userList = [];
+var user_dict = {};
 
 io.on('connection', (socket) => {
 	
@@ -30,7 +31,8 @@ io.on('connection', (socket) => {
 		
 	socket.on('new_user', (data) => {
 		userList.push(socket.username);
-		console.log(userList)
+		user_dict[socket.username] = userList.length-1;
+		
 		io.sockets.emit('new_user', {userList : userList});
 		io.sockets.emit('new_message', {message : socket.username + " has joined.", username : "Host"});
 	})
@@ -42,11 +44,18 @@ io.on('connection', (socket) => {
 			var old_name = socket.username
 			socket.username = data.username
 			
-			//update userList by removing old_name from userList
-			//emit new event with updated userList
-			//create dictionary with key of ID and value pair of name
 			//lookup ID and replace old name with new name
 			//where ID is position in userList, replace in userList
+			var name_index = user_dict[old_name];
+			userList[name_index] = socket.username;
+			user_dict[socket.username] = name_index;
+			
+			//IDs for a user's past usernames are stored in dict. 
+			//need to be wiped when socket leaves
+		
+			//update userList by removing old_name from userList
+			//emit new event with updated userList
+			io.sockets.emit('new_user', {userList: userList});
 			
 			io.sockets.emit('new_message', {message : old_name + " has changed their name to " + socket.username, username : "Host", limit : data.limit});
 		}
