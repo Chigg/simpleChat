@@ -100,7 +100,7 @@ function createUsername(firstQualif, secondQualif){
 		4: "Elephant",
 		5: "Dog",
 		6: "Zebra",
-		7: "Claire",
+		7: "Colin",
 		8: "Lion",
 		9: "CandleStick",
 		10: "Sloth",
